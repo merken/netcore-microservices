@@ -46,7 +46,7 @@ These should be accessible via these endpoints:
 
 ## Usage
 
-Feel free to tailer this project as you like, you can add more jobs in the build/spawnerjob.xml, modify the Dockerfiles and Jenkinsfiles to suit your needs.
+Feel free to tailor this project as you like, you can add more jobs in the build/spawnerjob.xml, modify the Dockerfiles and Jenkinsfiles to suit your needs.
 Once your docker containers are built, you can upload them to a repository and use them for testing, staging and even production.
 
 ## Authors
