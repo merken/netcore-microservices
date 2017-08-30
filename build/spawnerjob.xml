@@ -1,0 +1,96 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description></description>
+  <keepDependencies>false</keepDependencies>
+  <properties/>
+  <scm class="hudson.scm.NullSCM"/>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <javaposse.jobdsl.plugin.ExecuteDslScripts plugin="job-dsl@1.64">
+      <scriptText>pipelineJob(&apos;ngapp&apos;) {
+
+  def repo = &apos;https://github.com/merken/netcore-microservices.git&apos;
+
+  triggers {
+    scm(&apos;H/5 * * * *&apos;)
+  }
+  description(&quot;Pipeline for ngapp&quot;)
+
+  definition {
+    cpsScm {
+      scm {
+        git {
+          remote { url(repo) }
+          branches(&apos;master&apos;)
+          scriptPath(&apos;src/ngapp/Jenkinsfile&apos;)
+          extensions { }  // required as otherwise it may try to tag the repo, which you may not want
+        }
+      }
+    }
+  }
+}
+pipelineJob(&apos;productservice&apos;) {
+
+  def repo = &apos;https://github.com/merken/netcore-microservices.git&apos;
+
+  triggers {
+    scm(&apos;H/5 * * * *&apos;)
+  }
+  description(&quot;Pipeline for productservice&quot;)
+
+  definition {
+    cpsScm {
+      scm {
+        git {
+          remote { url(repo) }
+          branches(&apos;master&apos;)
+          scriptPath(&apos;src/productservice/Jenkinsfile&apos;)
+          extensions { }  // required as otherwise it may try to tag the repo, which you may not want
+        }
+      }
+    }
+  }
+}
+pipelineJob(&apos;userservice&apos;) {
+
+  def repo = &apos;https://github.com/merken/netcore-microservices.git&apos;
+
+  triggers {
+    scm(&apos;H/5 * * * *&apos;)
+  }
+  description(&quot;Pipeline for userservice&quot;)
+
+  definition {
+    cpsScm {
+      scm {
+        git {
+          remote { url(repo) }
+          branches(&apos;master&apos;)
+          scriptPath(&apos;src/userservice/Jenkinsfile&apos;)
+          extensions { }  // required as otherwise it may try to tag the repo, which you may not want
+        }
+      }
+    }
+  }
+}</scriptText>
+      <usingScriptText>true</usingScriptText>
+      <sandbox>false</sandbox>
+      <ignoreExisting>false</ignoreExisting>
+      <ignoreMissingFiles>false</ignoreMissingFiles>
+      <failOnMissingPlugin>false</failOnMissingPlugin>
+      <unstableOnDeprecation>false</unstableOnDeprecation>
+      <removedJobAction>IGNORE</removedJobAction>
+      <removedViewAction>IGNORE</removedViewAction>
+      <removedConfigFilesAction>IGNORE</removedConfigFilesAction>
+      <lookupStrategy>JENKINS_ROOT</lookupStrategy>
+    </javaposse.jobdsl.plugin.ExecuteDslScripts>
+  </builders>
+  <publishers/>
+  <buildWrappers/>
+</project>

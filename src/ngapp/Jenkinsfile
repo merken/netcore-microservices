@@ -1,0 +1,134 @@
+import groovy.json.JsonSlurper
+
+VERSION_NUMBER = ""
+APP_NAME = "ngapp"
+APP_PORT = "5002"
+/** Pipeline **/
+node {
+    ws(MICROSERVICE_NAME) {
+        try{
+            stage("scm pull") {
+				deleteDir();
+				cloneRepo();
+                VERSION_NUMBER = getVersionNumber();
+                currentBuild.displayName = "$VERSION_NUMBER";
+            }
+
+            stage("build") {
+				build_app(APP_NAME);
+            }
+
+            stage("test") {
+				//TODO create test project and test
+            }
+
+            stage("docker-build") {
+				docker_build('src/' + APP_NAME , APP_NAME + '.' + VERSION_NUMBER + '.tar.gz' , APP_NAME);
+            }
+
+            stage("docker-run") {
+				docker_run(APP_NAME, APP_PORT);
+            }
+        }
+        catch (InterruptedException x) {
+            currentBuild.result = 'ABORTED';
+            throw x;
+        }
+        catch (e) {
+            currentBuild.result = 'FAILURE';
+            throw e;
+        }
+    }
+}
+
+def cloneRepo() {
+    checkout scm;
+}
+
+def getVersionNumber() {
+    def out = sh(script: 'git rev-list --count HEAD', returnStdout: true);
+    def array = out.split("\\r?\\n");
+    def count = array[array.length - 1];
+
+    def commitCount = count.trim();
+
+    return commitCount;
+}
+
+def build_app(name){
+    dir('src/' + name){
+        sh(script: 'npm install', returnStdout: true);
+        sh(script: 'ng build', returnStdout: true);
+        sh(script: 'cp Dockerfile.build ./dist/Dockerfile', returnStdout: true);
+        sh(script: 'tar zcf '+ service + '.' + VERSION_NUMBER + '.tar.gz -C ./dist .', returnStdout: true);
+    }
+}
+
+def docker_build(srcfoldername, tarfilename, imagename){
+    dir(srcfoldername) {
+        dockerApiRequest('containers/' + imagename + '/stop', 'POST');
+        dockerApiRequest('containers/prune', 'POST');
+        dockerApiRequest('images/' + imagename, 'DELETE');
+        dockerApiRequest('build?t=' + imagename + ':' + VERSION_NUMBER + '&nocache=1&rm=1', 'POST', 'tar','', '@' + tarfilename, true);
+    }
+}
+
+def docker_run(service, port){
+    dir('src/' + service) {
+        def containerId = createContainer(service, port);
+        renameContainer(containerId, service);
+        startContainer(service);
+    }
+}
+
+def createContainer(imagename){
+    sh('echo \'{ "Image": "'+ imagename + ':' + VERSION_NUMBER + '", "ExposedPorts": { "80/tcp" : {} }, "HostConfig": { "PortBindings": { "80/tcp": [{ "HostPort": "' + port + '" }] } } }\' > imageconf');
+
+    def createResponse = dockerApiRequest('containers/create', 'POST', 'json', 'json', '@imageconf');
+    def containerId = createResponse.Id;
+
+    return containerId;
+}
+
+def renameContainer(containerId, newname){
+    def request = 'containers/' + containerId + '/rename?name=' + newname;
+    dockerApiRequest(request, 'POST');
+}
+
+def startContainer(name){
+    dockerApiRequest('containers/'+ name + '/start', 'POST');
+}
+
+def dockerApiRequest(request, method, contenttype = 'json', accept = '', data = '', isDataBinary = false){
+    def requestBuilder = 'curl -v -X ' + method + ' --unix-socket /var/run/docker.sock "http://0.0.0.0:2375/' + request + '"';
+
+    if(contenttype == 'json'){
+        requestBuilder += ' -H "Content-Type:application/json"';
+    }
+
+    if(contenttype == 'tar'){
+        requestBuilder += ' -H "Content-Type:application/x-tar"';
+    }
+
+    if(accept == 'json'){
+        requestBuilder += ' -H "Accept: application/json"';
+    }
+    
+    if(data.trim()){
+        if(isDataBinary){
+            requestBuilder += ' --data-binary ' + data + ' --dump-header - --no-buffer';
+        }else{
+            requestBuilder += ' -d ' + data;
+        }
+    }
+
+    def response = sh(script: requestBuilder, returnStdout:true);
+    
+    if(accept == 'json'){
+        def jsonSlurper = new JsonSlurper();
+        def json = jsonSlurper.parseText(response);
+        return json;
+    }
+
+    return null;
+}
