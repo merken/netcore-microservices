@@ -59,7 +59,7 @@ def build_app(name){
     dir('src/' + name){
         sh(script: 'npm install', returnStdout: true);
         sh(script: 'ng build', returnStdout: true);
-        sh(script: 'cp Dockerfile.build ./dist/Dockerfile', returnStdout: true);
+        sh(script: 'cp Dockerfile ./dist/Dockerfile', returnStdout: true);
         sh(script: 'tar zcf '+ service + '.' + VERSION_NUMBER + '.tar.gz -C ./dist .', returnStdout: true);
     }
 }
