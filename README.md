@@ -4,7 +4,7 @@ A microservices delivery setup with netcore and angular
 By [Maarten Merken](https://github.com/merken).
 
 ## Description
-**netcore-microservices** is a infrastructure template project to quickly get started with a local CI/CD environment using Jenkins and Docker.
+**netcore-microservices** is an infrastructure template project to quickly get started with a local CI/CD environment using Jenkins and Docker.
 At the base, there's the build/Dockerfile, which will provision a Jenkins CI environment using the build/spawnerjob.xml configuration file.
 This is a freestyle jenkins job, using the [DSL Job plugin](https://jenkinsci.github.io/job-dsl-plugin/) to declaratively create other jenkins jobs based on DSL syntax.
 
