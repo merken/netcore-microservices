@@ -5,7 +5,7 @@ APP_NAME = "ngapp"
 APP_PORT = "5002"
 /** Pipeline **/
 node {
-    ws(MICROSERVICE_NAME) {
+    ws(APP_NAME) {
         try{
             stage("scm pull") {
 				deleteDir();
