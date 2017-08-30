@@ -60,7 +60,7 @@ def build_app(name){
         sh(script: 'npm install', returnStdout: true);
         sh(script: 'ng build', returnStdout: true);
         sh(script: 'cp Dockerfile ./dist/Dockerfile', returnStdout: true);
-        sh(script: 'tar zcf '+ service + '.' + VERSION_NUMBER + '.tar.gz -C ./dist .', returnStdout: true);
+        sh(script: 'tar zcf '+ name + '.' + VERSION_NUMBER + '.tar.gz -C ./dist .', returnStdout: true);
     }
 }
 
