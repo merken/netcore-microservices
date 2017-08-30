@@ -80,7 +80,7 @@ def docker_run(service, port){
     }
 }
 
-def createContainer(imagename){
+def createContainer(imagename, port){
     sh('echo \'{ "Image": "'+ imagename + ':' + VERSION_NUMBER + '", "ExposedPorts": { "80/tcp" : {} }, "HostConfig": { "PortBindings": { "80/tcp": [{ "HostPort": "' + port + '" }] } } }\' > imageconf');
 
     def createResponse = dockerApiRequest('containers/create', 'POST', 'json', 'json', '@imageconf');
